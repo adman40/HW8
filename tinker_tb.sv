@@ -1,48 +1,89 @@
-`timescale 1ns / 1ps
-
 module tinker_tb;
-
-    // Testbench Signals
     logic [31:0] instruction;
-    logic [63:0] registers [0:31]; // Monitor register values
-
-    // Instantiate tinker_core
-    tinker_core uut (
-        .instruction(instruction)
-    );
-
-    // Task to display register contents
-    task print_registers;
-        integer i;
-        $display("Register File:");
-        for (i = 0; i < 8; i = i + 1) begin // Print first 8 registers for simplicity
-            $display("R[%0d] = %d", i, uut.reg_file.registers[i]);
-        end
-    endtask
-
+    tinker_core uut(.instruction(instruction));
     initial begin
-        $display("Starting Test...");
-
-        // Initialize registers (write values to rs and rt)
-        uut.reg_file.registers[1] = 10;  // rs = R1 = 10
-        uut.reg_file.registers[2] = 20;  // rt = R2 = 20
-
-        print_registers();
-
-        // ADD Instruction: R3 = R1 + R2
-        // Format: [OPCODE(5)][RD(5)][RS(5)][RT(5)][LITERAL(12)]
-        instruction = {5'h18, 5'd3, 5'd1, 5'd2, 12'b0}; // Opcode 5'h18 = ADD, R3 = R1 + R2
-
-        #10; // Wait for combinational logic to settle
-        print_registers(); // Display after addition
-
-        // Check result
-        if (uut.reg_file.registers[3] == 30) begin
-            $display("✅ Test Passed: R3 contains 30");
-        end else begin
-            $display("❌ Test Failed: R3 = %d (Expected: 30)", uut.reg_file.registers[3]);
-        end
-
-        $stop; // End simulation
+        uut.reg_file.registers[1] = 10;
+        uut.reg_file.registers[2] = 20;
+        instruction = {5'h18, 5'd3, 5'd1, 5'd2, 12'b0};
+        #10;
+        if (uut.reg_file.registers[3] == 30) $display("5'h18 passed"); else $display("5'h18 failed");
+        uut.reg_file.registers[4] = 10;
+        instruction = {5'h19, 5'd4, 5'd0, 5'd0, 12'd5};
+        #10;
+        if (uut.reg_file.registers[4] == 15) $display("5'h19 passed"); else $display("5'h19 failed");
+        uut.reg_file.registers[6] = 30;
+        uut.reg_file.registers[7] = 10;
+        instruction = {5'h1a, 5'd8, 5'd6, 5'd7, 12'b0};
+        #10;
+        if (uut.reg_file.registers[8] == 20) $display("5'h1a passed"); else $display("5'h1a failed");
+        uut.reg_file.registers[9] = 10;
+        instruction = {5'h1b, 5'd9, 5'd0, 5'd0, 12'd2};
+        #10;
+        if (uut.reg_file.registers[9] == 8) $display("5'h1b passed"); else $display("5'h1b failed");
+        uut.reg_file.registers[10] = 6;
+        uut.reg_file.registers[11] = 7;
+        instruction = {5'h1c, 5'd12, 5'd10, 5'd11, 12'b0};
+        #10;
+        if (uut.reg_file.registers[12] == 42) $display("5'h1c passed"); else $display("5'h1c failed");
+        uut.reg_file.registers[13] = 50;
+        uut.reg_file.registers[14] = 25;
+        instruction = {5'h1d, 5'd15, 5'd13, 5'd14, 12'b0};
+        #10;
+        if (uut.reg_file.registers[15] == 2) $display("5'h1d passed"); else $display("5'h1d failed");
+        uut.reg_file.registers[1] = 15;
+        uut.reg_file.registers[2] = 5;
+        instruction = {5'h0, 5'd3, 5'd1, 5'd2, 12'b0};
+        #10;
+        if (uut.reg_file.registers[3] == (15 & 5)) $display("5'h0 passed"); else $display("5'h0 failed");
+        instruction = {5'h1, 5'd4, 5'd1, 5'd2, 12'b0};
+        #10;
+        if (uut.reg_file.registers[4] == (15 | 5)) $display("5'h1 passed"); else $display("5'h1 failed");
+        instruction = {5'h2, 5'd5, 5'd1, 5'd2, 12'b0};
+        #10;
+        if (uut.reg_file.registers[5] == (15 ^ 5)) $display("5'h2 passed"); else $display("5'h2 failed");
+        instruction = {5'h3, 5'd6, 5'd1, 5'd0, 12'b0};
+        #10;
+        if (uut.reg_file.registers[6] == ~15) $display("5'h3 passed"); else $display("5'h3 failed");
+        uut.reg_file.registers[1] = 64'd32;
+        uut.reg_file.registers[2] = 64'd3;
+        instruction = {5'h4, 5'd7, 5'd1, 5'd2, 12'b0};
+        #10;
+        if (uut.reg_file.registers[7] == (32 >> 3)) $display("5'h4 passed"); else $display("5'h4 failed");
+        uut.reg_file.registers[4] = 64'd16;
+        instruction = {5'h5, 5'd4, 5'd0, 5'd0, 12'd2};
+        #10;
+        if (uut.reg_file.registers[4] == (16 >> 2)) $display("5'h5 passed"); else $display("5'h5 failed");
+        uut.reg_file.registers[1] = 64'd2;
+        uut.reg_file.registers[2] = 64'd3;
+        instruction = {5'h6, 5'd8, 5'd1, 5'd2, 12'b0};
+        #10;
+        if (uut.reg_file.registers[8] == (2 << 3)) $display("5'h6 passed"); else $display("5'h6 failed");
+        uut.reg_file.registers[9] = 64'd1;
+        instruction = {5'h7, 5'd9, 5'd0, 5'd0, 12'd2};
+        #10;
+        if (uut.reg_file.registers[9] == (1 << 2)) $display("5'h7 passed"); else $display("5'h7 failed");
+        uut.reg_file.registers[1] = 64'd99;
+        instruction = {5'h11, 5'd2, 5'd1, 5'd0, 12'b0};
+        #10;
+        if (uut.reg_file.registers[2] == 99) $display("5'h11 passed"); else $display("5'h11 failed");
+        uut.reg_file.registers[3] = 64'hABCD123400000000;
+        instruction = {5'h12, 5'd3, 5'd0, 5'd0, 12'h111};
+        #10;
+        if (uut.reg_file.registers[3] == ((64'hABCD123400000000 & 64'hFFFFFFFFFFFFF000) | 12'h111)) $display("5'h12 passed"); else $display("5'h12 failed");
+        uut.reg_file.registers[6] = $realtobits(3.5);
+        uut.reg_file.registers[7] = $realtobits(2.2);
+        instruction = {5'h14, 5'd8, 5'd6, 5'd7, 12'b0};
+        #10;
+        if ($bitstoreal(uut.reg_file.registers[8]) == 5.7) $display("5'h14 passed"); else $display("5'h14 failed");
+        instruction = {5'h15, 5'd9, 5'd6, 5'd7, 12'b0};
+        #10;
+        if ($bitstoreal(uut.reg_file.registers[9]) == (3.5 - 2.2)) $display("5'h15 passed"); else $display("5'h15 failed");
+        instruction = {5'h16, 5'd10, 5'd6, 5'd7, 12'b0};
+        #10;
+        if ($bitstoreal(uut.reg_file.registers[10]) == (3.5 * 2.2)) $display("5'h16 passed"); else $display("5'h16 failed");
+        instruction = {5'h17, 5'd11, 5'd6, 5'd7, 12'b0};
+        #10;
+        if ($bitstoreal(uut.reg_file.registers[11]) == (3.5 / 2.2)) $display("5'h17 passed"); else $display("5'h17 failed");
+        $finish;
     end
 endmodule
