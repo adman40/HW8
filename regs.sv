@@ -1,4 +1,4 @@
-module register_file (
+module register_file(
     input [4:0] readReg1, readReg2, writeReg,
     input [63:0] writeData,
     input allowWrite,
