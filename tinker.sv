@@ -45,8 +45,6 @@ module tinker_core(
        .result(fpuResult)
    );
 
-   logic [63:0] writeBackData;
-
    always @(*) begin
        case(opcode)
            5'h14, 5'h15, 5'h16, 5'h17:
