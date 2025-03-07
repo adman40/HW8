@@ -1,10 +1,9 @@
 # Verilog Compiler and Simulator
 IVERILOG = iverilog
 VVP = vvp
-GTKWAVE = gtkwave
 
 # Source Files
-SRC = tinker.sv alu.sv regs.sv decoder.sv testbench.sv
+SRC = tinker.sv alu.sv regs.sv decoder.sv
 
 # Output Executable
 OUT = tinker_sim
@@ -14,15 +13,11 @@ all: compile run
 
 # Compile Verilog Code
 compile:
-	$(IVERILOG) -o $(OUT) $(SRC)
+	$(IVERILOG) -g2012 -o $(OUT) $(SRC)
 
 # Run the Simulation
 run:
 	$(VVP) $(OUT)
-
-# View Waveform in GTKWave (If using .vcd)
-view:
-	$(GTKWAVE) waveform.vcd &
 
 # Clean Generated Files
 clean:

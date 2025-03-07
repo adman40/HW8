@@ -1,11 +1,12 @@
 module tinker_core(
-    input logic [31:0] instruction,
-    output logic [63:0] registers [0:31]
+    input logic [31:0] instruction
 );
 
    logic [4:0] opcode, rd, rs, rt;
    logic [11:0] literal;
    logic [63:0] reg1Data, reg2Data, regDestData, aluResult;
+
+   logic [63:0] registers [0:31];
 
    decoder decoderInst (
     .instruction(instruction),
