@@ -28,7 +28,7 @@ module tinker_core(
     .registers(registers)
    );
 
-   assign regDestData = registers[rd]
+   assign regDestData = registers[rd];
 
    alu alu (
     .rd(regDestData),
