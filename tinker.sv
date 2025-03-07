@@ -23,8 +23,7 @@ module tinker_core(
     .writeData(writeBackData),
     .allowWrite(1'b1),
     .reg1Data(reg1Data),
-    .reg2Data(reg2Data),
-    .registers(registers)
+    .reg2Data(reg2Data)
    );
 
    assign regDestData = (rd == rs) ? reg1Data : (rd == rt) ? reg2Data : 64'b0;
