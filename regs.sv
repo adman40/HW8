@@ -3,10 +3,11 @@ module register_file(
     input [63:0] writeData,
     input allowWrite,
     output logic [63:0] reg1Data,
-    output logic [63:0] reg2Data
+    output logic [63:0] reg2Data,
+    output logic [63:0] registers [0:31]
 );
     // initialize 32 registers 
-    reg [63:0] registers [0:31];
+    logic [63:0] registers [0:31];
     initial begin
         integer i;
         for (i = 0; i < 32; i = i + 1)

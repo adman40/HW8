@@ -8,7 +8,7 @@ module tinker_core(
 
    logic [63:0] registers [0:31];
 
-   decoder decoderInst (
+   decoder decoder (
     .instruction(instruction),
     .opcode(opcode),
     .rd(rd),
@@ -28,8 +28,10 @@ module tinker_core(
     .registers(registers)
    );
 
-   alu aluInst (
-    .rd(registers[rd]),
+   assign regDestData = registers[rd]
+
+   alu alu (
+    .rd(regDestData),
     .rs(reg1Data),
     .rt(reg2Data),
     .opcode(opcode),
