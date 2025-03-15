@@ -102,10 +102,10 @@ module tinker_core(
 
    assign nextProgramCounter = controlNextPC;
    assign regWriteData = controlWriteBackData;
-   assign regWriteAddr = controlWriteReg;
+   assign regWriteAddress = controlWriteReg;
    assign regWriteEnable = controlWriteEnable;
-   assign regReadAddrA = controlRegFileAddressA;
-   assign regReadAddrB = controlgRegFileAddressB;
+   assign regReadAddressA = controlRegFileAddressA;
+   assign regReadAddressB = controlgRegFileAddressB;
    assign memAddress = controlMemAddress;
    assign memWriteEnabled = controlMemWriteEnabled;
    assign memWriteData = controlMemWriteData;
@@ -352,6 +352,8 @@ module control (
    ); 
 
    always @(*) begin
+    regFileAddressA = rs;
+    regFileAddressB = rt;
        case (opcode)
            5'hb:
                regFileAddressB = rd;
@@ -368,10 +370,6 @@ module control (
            5'h13: begin
                regFileAddressA = rd;
                regFileAddressB = rs;
-           end
-           default: begin
-                regFileAddressA = rs;
-                regFileAddressB = rt;
            end
        endcase
    end
