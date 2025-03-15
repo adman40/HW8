@@ -131,7 +131,7 @@ module register_file(
         integer i;
         for (i = 0; i < 32; i = i + 1)
             registers[i] = 64'b0;
-        registers[31] = MEM_SIZE;
+        registers[31] = 64'h00010000;
     end
 
     // read regs
@@ -143,7 +143,7 @@ module register_file(
         if (reset) begin
             for (i = 0; i < 32; i = i + 1)
                 registers[i] = 64'b0;
-            registers[31] = MEM_SIZE ;
+            registers[31] = 64'h00010000;
         end
         else if (allowWrite && writeReg != 0) 
             registers[writeReg] <= writeData;
