@@ -131,7 +131,7 @@ module register_file(
         integer i;
         for (i = 0; i < 32; i = i + 1)
             registers[i] = 64'b0;
-        registers[31] = MEM_SIZE - 1;
+        registers[31] = MEM_SIZE;
     end
 
     // read regs
