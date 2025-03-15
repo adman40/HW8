@@ -57,7 +57,7 @@ module tinker_core(
    wire [31:0] dataAddress;
    wire [63:0] memData;
 
-   memory #(.MEM_SIZE(MEM_SIZE)) dataMemInstance (
+   memory #(.MEM_SIZE(MEM_SIZE)) memory(
     .clk(clk),
     .reset(reset),
     .address(memAddress),
