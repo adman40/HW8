@@ -352,8 +352,6 @@ module control (
    ); 
 
    always @(*) begin
-    regFileAddressA = rs;
-    regFileAddressB = rt;
        case (opcode)
            5'hb:
                regFileAddressB = rd;
@@ -370,6 +368,10 @@ module control (
            5'h13: begin
                regFileAddressA = rd;
                regFileAddressB = rs;
+           end
+           default: begin
+                regFileAddressA = rs;
+                regFileAddressB = rt;
            end
        endcase
    end
