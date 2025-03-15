@@ -1,89 +1,68 @@
-module tinker_tb;
-    logic [31:0] instruction;
-    tinker_core uut(.instruction(instruction));
+`timescale 1ns/1ps
+
+module tb_tinker_core;
+    reg clk;
+    reg reset;
+    reg [31:0] add_inst; // addition instruction variable
+
+    // Instantiate the design under test.
+    tinker_core uut (
+        .clk(clk),
+        .reset(reset)
+    );
+
+    // Delay clock generation so initialization can occur first.
     initial begin
-        uut.reg_file.registers[1] = 10;
-        uut.reg_file.registers[2] = 20;
-        instruction = {5'h18, 5'd3, 5'd1, 5'd2, 12'b0};
-        #10;
-        if (uut.reg_file.registers[3] == 30) $display("5'h18 passed"); else $display("5'h18 failed");
-        uut.reg_file.registers[4] = 10;
-        instruction = {5'h19, 5'd4, 5'd0, 5'd0, 12'd5};
-        #10;
-        if (uut.reg_file.registers[4] == 15) $display("5'h19 passed"); else $display("5'h19 failed");
-        uut.reg_file.registers[6] = 30;
-        uut.reg_file.registers[7] = 10;
-        instruction = {5'h1a, 5'd8, 5'd6, 5'd7, 12'b0};
-        #10;
-        if (uut.reg_file.registers[8] == 20) $display("5'h1a passed"); else $display("5'h1a failed");
-        uut.reg_file.registers[9] = 10;
-        instruction = {5'h1b, 5'd9, 5'd0, 5'd0, 12'd2};
-        #10;
-        if (uut.reg_file.registers[9] == 8) $display("5'h1b passed"); else $display("5'h1b failed");
-        uut.reg_file.registers[10] = 6;
-        uut.reg_file.registers[11] = 7;
-        instruction = {5'h1c, 5'd12, 5'd10, 5'd11, 12'b0};
-        #10;
-        if (uut.reg_file.registers[12] == 42) $display("5'h1c passed"); else $display("5'h1c failed");
-        uut.reg_file.registers[13] = 50;
-        uut.reg_file.registers[14] = 25;
-        instruction = {5'h1d, 5'd15, 5'd13, 5'd14, 12'b0};
-        #10;
-        if (uut.reg_file.registers[15] == 2) $display("5'h1d passed"); else $display("5'h1d failed");
-        uut.reg_file.registers[1] = 15;
-        uut.reg_file.registers[2] = 5;
-        instruction = {5'h0, 5'd3, 5'd1, 5'd2, 12'b0};
-        #10;
-        if (uut.reg_file.registers[3] == (15 & 5)) $display("5'h0 passed"); else $display("5'h0 failed");
-        instruction = {5'h1, 5'd4, 5'd1, 5'd2, 12'b0};
-        #10;
-        if (uut.reg_file.registers[4] == (15 | 5)) $display("5'h1 passed"); else $display("5'h1 failed");
-        instruction = {5'h2, 5'd5, 5'd1, 5'd2, 12'b0};
-        #10;
-        if (uut.reg_file.registers[5] == (15 ^ 5)) $display("5'h2 passed"); else $display("5'h2 failed");
-        instruction = {5'h3, 5'd6, 5'd1, 5'd0, 12'b0};
-        #10;
-        if (uut.reg_file.registers[6] == ~15) $display("5'h3 passed"); else $display("5'h3 failed");
-        uut.reg_file.registers[1] = 64'd32;
-        uut.reg_file.registers[2] = 64'd3;
-        instruction = {5'h4, 5'd7, 5'd1, 5'd2, 12'b0};
-        #10;
-        if (uut.reg_file.registers[7] == (32 >> 3)) $display("5'h4 passed"); else $display("5'h4 failed");
-        uut.reg_file.registers[4] = 64'd16;
-        instruction = {5'h5, 5'd4, 5'd0, 5'd0, 12'd2};
-        #10;
-        if (uut.reg_file.registers[4] == (16 >> 2)) $display("5'h5 passed"); else $display("5'h5 failed");
-        uut.reg_file.registers[1] = 64'd2;
-        uut.reg_file.registers[2] = 64'd3;
-        instruction = {5'h6, 5'd8, 5'd1, 5'd2, 12'b0};
-        #10;
-        if (uut.reg_file.registers[8] == (2 << 3)) $display("5'h6 passed"); else $display("5'h6 failed");
-        uut.reg_file.registers[9] = 64'd1;
-        instruction = {5'h7, 5'd9, 5'd0, 5'd0, 12'd2};
-        #10;
-        if (uut.reg_file.registers[9] == (1 << 2)) $display("5'h7 passed"); else $display("5'h7 failed");
-        uut.reg_file.registers[1] = 64'd99;
-        instruction = {5'h11, 5'd2, 5'd1, 5'd0, 12'b0};
-        #10;
-        if (uut.reg_file.registers[2] == 99) $display("5'h11 passed"); else $display("5'h11 failed");
-        uut.reg_file.registers[3] = 64'hABCD123400000000;
-        instruction = {5'h12, 5'd3, 5'd0, 5'd0, 12'h111};
-        #10;
-        if (uut.reg_file.registers[3] == ((64'hABCD123400000000 & 64'hFFFFFFFFFFFFF000) | 12'h111)) $display("5'h12 passed"); else $display("5'h12 failed");
-        uut.reg_file.registers[6] = $realtobits(3.5);
-        uut.reg_file.registers[7] = $realtobits(2.2);
-        instruction = {5'h14, 5'd8, 5'd6, 5'd7, 12'b0};
-        #10;
-        if ($bitstoreal(uut.reg_file.registers[8]) == 5.7) $display("5'h14 passed"); else $display("5'h14 failed");
-        instruction = {5'h15, 5'd9, 5'd6, 5'd7, 12'b0};
-        #10;
-        if ($bitstoreal(uut.reg_file.registers[9]) == (3.5 - 2.2)) $display("5'h15 passed"); else $display("5'h15 failed");
-        instruction = {5'h16, 5'd10, 5'd6, 5'd7, 12'b0};
-        #10;
-        if ($bitstoreal(uut.reg_file.registers[10]) == (3.5 * 2.2)) $display("5'h16 passed"); else $display("5'h16 failed");
-        instruction = {5'h17, 5'd11, 5'd6, 5'd7, 12'b0};
-        #10;
-        if ($bitstoreal(uut.reg_file.registers[11]) == (3.5 / 2.2)) $display("5'h17 passed"); else $display("5'h17 failed");
+        clk = 0;
+        #25;            // Delay clock start by 25 ns
+        forever #5 clk = ~clk;
+    end
+
+    // Generate reset: assert for 20 ns, then deassert.
+    initial begin
+        reset = 1;
+        #20;
+        reset = 0;
+    end
+
+    // Load the addition instruction into memory at address 0x2000.
+    // The instruction is formatted as:
+    //   opcode   = 5'h18 (add: rs + rt)
+    //   rd       = 5'd1   (destination register R1)
+    //   rs       = 5'd2   (first source register R2)
+    //   rt       = 5'd3   (second source register R3)
+    //   literal  = 12'd0  (unused for addition)
+    // This creates an instruction word: {opcode, rd, rs, rt, literal}
+    initial begin
+        @(negedge reset);
+        #1; // small delay after reset deassertion
+        add_inst = {5'h18, 5'd1, 5'd2, 5'd3, 12'd0};
+        uut.instructionMemInstance.bytes[32'h00002000]     = add_inst[7:0];
+        uut.instructionMemInstance.bytes[32'h00002000 + 1] = add_inst[15:8];
+        uut.instructionMemInstance.bytes[32'h00002000 + 2] = add_inst[23:16];
+        uut.instructionMemInstance.bytes[32'h00002000 + 3] = add_inst[31:24];
+        $display("Addition instruction loaded: %h", add_inst);
+    end
+
+    // Initialize registers R2 and R3.
+    // R2 will be set to 10 and R3 to 15 so that R1 = 10 + 15 = 25.
+    initial begin
+        @(negedge reset);
+        #1; // small delay after reset deassertion
+        uut.reg_file.registers[2] = 64'd10;
+        uut.reg_file.registers[3] = 64'd15;
+        $display("Registers initialized: R2 = 10, R3 = 15");
+    end
+
+    // Monitor the result after allowing a few clock cycles for execution.
+    initial begin
+        #150; // wait enough time for the instruction to be fetched and executed
+        $display("Final value in R1: %d", uut.reg_file.registers[1]);
+        if (uut.reg_file.registers[1] == 25)
+            $display("Test Passed: R1 = R2 + R3 = 10 + 15 = 25");
+        else
+            $display("Test Failed: Expected 25 but got %d", uut.reg_file.registers[1]);
         $finish;
     end
+
 endmodule

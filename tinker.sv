@@ -42,9 +42,9 @@ module tinker_core(
    register_file reg_file (
         .clk(clk),
         .reset(reset),
-        .readReg1(regReadAddrA),
-        .readReg2(regReadAddrB),
-        .writeReg(regWriteAddr),
+        .readReg1(regReadAddressA),
+        .readReg2(regReadAddressB),
+        .writeReg(regWriteAddress),
         .writeData(regWriteData),
         .allowWrite(regWriteEnable),
         .reg1Data(reg1Data),
@@ -78,7 +78,7 @@ module tinker_core(
    wire controlWriteEnable;
    wire [4:0] controlWriteReg;
    wire[4:0] controlRegFileAddressA;
-   wire[4:0] controlgRegFileAddressB;
+   wire[4:0] controlRegFileAddressB;
 
    control controlInst (
     .clk(clk),
@@ -97,7 +97,7 @@ module tinker_core(
     .writeEnable(controlWriteEnable),
     .writeRegister(controlWriteReg),
     .regFileAddressA(controlRegFileAddressA),
-    .regFileAddressB(controlgRegFileAddressB)
+    .regFileAddressB(controlRegFileAddressB)
    );
 
    assign nextProgramCounter = controlNextPC;
@@ -105,7 +105,7 @@ module tinker_core(
    assign regWriteAddress = controlWriteReg;
    assign regWriteEnable = controlWriteEnable;
    assign regReadAddressA = controlRegFileAddressA;
-   assign regReadAddressB = controlgRegFileAddressB;
+   assign regReadAddressB = controlRegFileAddressB;
    assign memAddress = controlMemAddress;
    assign memWriteEnabled = controlMemWriteEnabled;
    assign memWriteData = controlMemWriteData;
@@ -318,12 +318,17 @@ module control (
             5'h18, 5'h1a, 5'h1c, 5'h1d, 5'h0, 5'h1, 5'h2, 5'h4, 5'h6, 5'h14, 5'h15, 5'h16, 5'h17: begin
             rsData = portAData;
             rtData = portBData;
+            rdData = 64'b0;
             end
             5'h19, 5'h1b, 5'h5, 5'h7, 5'h12: begin
             rdData = portAData;
+            rtData = 64'b0;
+            rsData = 64'b0;
             end
             5'h3, 5'h11: begin
             rsData = portAData;
+            rtData = 64'b0;
+            rdData = 64'b0;
             end
             default: begin
                 rdData = 64'b0;
