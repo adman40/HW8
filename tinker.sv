@@ -20,7 +20,7 @@ module tinker_core(
     .reset(reset),
     .address(programCounter),
     .writeEnable(1'b0),
-    .storeData(64'b0),
+    .writeData(64'b0),
     .fetchAddress(programCounter),
     .dataAddress(32'b0),
     .fetchInstruction(fetchInstruction),
@@ -62,7 +62,7 @@ module tinker_core(
     .reset(reset),
     .address(memAddress),
     .writeEnable(memWriteEnabled),
-    .storeData(memWriteData),
+    .writeData(memWriteData),
     .fetchAddress(32'b0),
     .dataAddress(dataAddress),
     .fetchInstruction(),
@@ -124,6 +124,9 @@ module register_file(
     output logic [63:0] registers [0:31]
 );
 
+
+   parameter MEM_SIZE = 524288;
+
     initial begin
         integer i;
         for (i = 0; i < 32; i = i + 1)
@@ -134,7 +137,7 @@ module register_file(
     // read regs
     assign reg1Data = registers[readReg1];
     assign reg2Data = registers[readReg2];
-
+    integer i;
     // write reg 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
@@ -306,23 +309,27 @@ module control (
     );
 
     wire [63:0] aluResult;
-    wire [63:0] rdData;
-    wire [63:0] rsData;
-    wire [63:0] rtData;
+    logic [63:0] rdData;
+    logic [63:0] rsData;
+    logic [63:0] rtData;
 
     always @(*) begin
-        rdData = 64'b0;
-        rsData = 64'b0;
-        rtData = 64'b0;
         case (opcode)
-            5'h18, 5'h1a, 5'h1c, 5'h1d, 5'h0, 5'h1, 5'h2, 5'h4, 5'h6, 5'h14, 5'h15, 5'h16, 5'h17:
+            5'h18, 5'h1a, 5'h1c, 5'h1d, 5'h0, 5'h1, 5'h2, 5'h4, 5'h6, 5'h14, 5'h15, 5'h16, 5'h17: begin
             rsData = portAData;
             rtData = portBData;
-            5'h19, 5'h1b, 5'h5, 5'h7, 5'h12:
+            end
+            5'h19, 5'h1b, 5'h5, 5'h7, 5'h12: begin
             rdData = portAData;
-            5'h3, 5'h11:
+            end
+            5'h3, 5'h11: begin
             rsData = portAData;
-            default:
+            end
+            default: begin
+                rdData = 64'b0;
+                rsData = 64'b0;
+                rtData = 64'b0;
+            end
         endcase
     end
 
@@ -362,9 +369,10 @@ module control (
                regFileAddressA = rd;
                regFileAddressB = rs;
            end
-           default:
+           default: begin
                 regFileAddressA = rs;
                 regFileAddressB = rt;
+           end
        endcase
    end
 
@@ -379,7 +387,7 @@ module control (
        dataAddress = 32'b0;
 
        case (opcode)
-           5'h0, 5'h1, 5'h2, 5'h3, 5'h4, 5'h5, 5'h6, 5'h6, 5'h7,
+           5'h0, 5'h1, 5'h2, 5'h3, 5'h4, 5'h5, 5'h6, 5'h7,
            5'h18, 5'h19, 5'h1a, 5'h1b, 5'h1c, 5'h1d, 5'h12: begin
                writeBackData = aluResult;
                writeEnable = 1'b1;
