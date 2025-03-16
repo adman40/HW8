@@ -3,28 +3,25 @@ module tinker_core(
     input reset
 );
 
-   parameter MEM_SIZE = 524288;
-
    reg [31:0] programCounter;
-   wire [31:0] nextProgramCounter;
-   always @(posedge clk or posedge reset) begin
-       if (reset)
-           programCounter <= 32'h00002000;
-       else 
-           programCounter <= nextProgramCounter;
-   end
 
    wire [31:0] fetchInstruction;
-   memory #(.MEM_SIZE(MEM_SIZE)) instructionMemInstance (
+   wire [63:0] dataOut;
+   wire [31:0] dataAddress;
+   wire writeEnable;
+   wire [31:0] address;
+   wire [63:0] writeData;
+
+   memory memory(
     .clk(clk),
     .reset(reset),
-    .address(programCounter),
-    .writeEnable(1'b0),
-    .writeData(64'b0),
+    .address(address),
+    .writeEnable(writeEnable),
+    .writeData(writeData),
     .fetchAddress(programCounter),
-    .dataAddress(32'b0),
+    .dataAddress(dataAddress),
     .fetchInstruction(fetchInstruction),
-    .dataOut()
+    .dataOut(dataOut)
    );
 
    wire [31:0] instruction;
@@ -34,39 +31,22 @@ module tinker_core(
     .instruction(instruction)
    );
 
-   wire [63:0] reg1Data, reg2Data;
-   wire [4:0] regReadAddressA, regReadAddressB, regWriteAddress;
-   wire [63:0] regWriteData;
-   wire regWriteEnable;
+   wire [63:0] reg2Data, reg3Data;
+   wire [4:0] regFileAddressA, regFileAddressB;
+   reg [63:0] regWriteData;
+   reg [4:0] writeReg;
+   reg regWriteEnable;
 
    register_file reg_file (
         .clk(clk),
         .reset(reset),
-        .readReg1(regReadAddressA),
-        .readReg2(regReadAddressB),
-        .writeReg(regWriteAddress),
+        .rd(writeReg),
+        .rs(regFileAddressA),
+        .rt(regFileAddressB),
         .writeData(regWriteData),
         .allowWrite(regWriteEnable),
-        .reg1Data(reg1Data),
-        .reg2Data(reg2Data)
-   );
-
-   wire [31:0] memAddress;
-   wire memWriteEnabled;
-   wire [63:0] memWriteData;
-   wire [31:0] dataAddress;
-   wire [63:0] memData;
-
-   memory #(.MEM_SIZE(MEM_SIZE)) memory(
-    .clk(clk),
-    .reset(reset),
-    .address(memAddress),
-    .writeEnable(memWriteEnabled),
-    .writeData(memWriteData),
-    .fetchAddress(32'b0),
-    .dataAddress(dataAddress),
-    .fetchInstruction(),
-    .dataOut(memData)
+        .reg2Data(reg2Data),
+        .reg3Data(reg3Data)
    );
 
    wire [31:0] controlNextPC;
@@ -85,9 +65,9 @@ module tinker_core(
     .reset(reset),
     .instruction(instruction),
     .programCounter(programCounter),
-    .portAData(reg1Data),
-    .portBData(reg2Data),
-    .memData(memData),
+    .portAData(reg2Data),
+    .portBData(reg3Data),
+    .memData(dataOut),
     .programCounterNextState(controlNextPC),
     .writeBackData(controlWriteBackData),
     .memWriteEnabled(controlMemWriteEnabled),
@@ -100,54 +80,58 @@ module tinker_core(
     .regFileAddressB(controlRegFileAddressB)
    );
 
-   assign nextProgramCounter = controlNextPC;
-   assign regWriteData = controlWriteBackData;
-   assign regWriteAddress = controlWriteReg;
-   assign regWriteEnable = controlWriteEnable;
-   assign regReadAddressA = controlRegFileAddressA;
-   assign regReadAddressB = controlRegFileAddressB;
-   assign memAddress = controlMemAddress;
-   assign memWriteEnabled = controlMemWriteEnabled;
-   assign memWriteData = controlMemWriteData;
-   assign dataAddress = controlDataAddress;
+    assign regFileAddressA = controlRegFileAddressA;
+    assign regFileAddressB = controlRegFileAddressB; 
 
+    always @(*) begin
+        regWriteData = controlWriteBackData;
+        regWriteEnable = controlWriteEnable;
+        writeReg = controlWriteReg;
+    end
+
+    assign memAddress = controlMemAddress;
+    assign memWriteEnabled = controlMemWriteEnabled;
+    assign memWriteData = controlMemWriteData;
+    assign dataAddress = controlDataAddress;
+
+   always @(posedge clk) begin
+    if (reset)
+    programCounter <= 32'h2000;
+    else 
+    programCounter <= controlNextPC;
+   end
 endmodule
 
 module register_file(
     input logic clk,
     input logic reset,
-    input [4:0] readReg1, readReg2, writeReg,
+    input [4:0] rd, rs, rt,
     input [63:0] writeData,
     input allowWrite,
-    output logic [63:0] reg1Data,
-    output logic [63:0] reg2Data,
-    output logic [63:0] registers [0:31]
+    output reg [63:0] reg1Data,
+    output reg [63:0] reg2Data,
+    output reg [63:0] reg3Data
 );
-
-
-   parameter MEM_SIZE = 524288;
-
-    initial begin
-        integer i;
-        for (i = 0; i < 32; i = i + 1)
-            registers[i] = 64'b0;
-        registers[31] = 64'h00010000;
-    end
-
-    // read regs
-    assign reg1Data = registers[readReg1];
-    assign reg2Data = registers[readReg2];
+    reg [63:0] registers [0:31];
     integer i;
-    // write reg 
+
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             for (i = 0; i < 32; i = i + 1)
                 registers[i] = 64'b0;
             registers[31] = 64'h00010000;
         end
-        else if (allowWrite && writeReg != 0) 
-            registers[writeReg] <= writeData;
+        else if (allowWrite && rd != 0) begin
+            registers[rd] <= writeData;
+        end
     end
+
+    always @(*) begin
+        reg1Data = registers[rd];
+        reg2Data = registers[rs];
+        reg3Data = registers[rt];
+    end
+
 endmodule
 
 module decoder (
@@ -357,6 +341,8 @@ module control (
    ); 
 
    always @(*) begin
+       regFileAddressA = rs;
+       regFileAddressB = rt;
        case (opcode)
            5'hb:
                regFileAddressB = rd;
