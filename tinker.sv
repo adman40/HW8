@@ -31,7 +31,7 @@ module tinker_core(
     .instruction(instruction)
    );
 
-   wire [63:0] reg2Data, reg3Data;
+   wire [63:0] reg1Data, reg2Data, reg3Data;
    wire [4:0] regFileAddressA, regFileAddressB;
    reg [63:0] regWriteData;
    reg [4:0] writeReg;
@@ -45,6 +45,7 @@ module tinker_core(
         .rt(regFileAddressB),
         .writeData(regWriteData),
         .allowWrite(regWriteEnable),
+        .reg1Data(reg1Data),
         .reg2Data(reg2Data),
         .reg3Data(reg3Data)
    );
@@ -67,6 +68,7 @@ module tinker_core(
     .programCounter(programCounter),
     .portAData(reg2Data),
     .portBData(reg3Data),
+    .regDData(reg1Data),
     .memData(dataOut),
     .programCounterNextState(controlNextPC),
     .writeBackData(controlWriteBackData),
@@ -267,6 +269,7 @@ module control (
     input logic [31:0] programCounter,
     input logic [63:0] portAData,
     input logic [63:0] portBData,
+    input logic [63:0] regDData,
     input logic [63:0] memData,
     output reg [31:0] programCounterNextState,
     output reg [63:0] writeBackData,
@@ -410,7 +413,7 @@ module control (
            end
            5'he: begin
                if ($signed(portAData) > $signed(portBData))
-                   programCounterNextState = portBData;
+                   programCounterNextState = regDData;
                 else 
                    programCounterNextState = programCounter + 4;
            end
