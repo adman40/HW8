@@ -1,4 +1,4 @@
-odule tinker_tb;
+module tinker_tb;
     logic [31:0] instruction;
     tinker_core uut(.instruction(instruction));
     initial begin
