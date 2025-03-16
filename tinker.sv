@@ -357,8 +357,6 @@ module control (
            end
            5'hd:
                regFileAddressA = 5'd31;
-           5'he: 
-               regFileAddressB = rd;
            5'h13: begin
                regFileAddressA = rd;
                regFileAddressB = rs;
